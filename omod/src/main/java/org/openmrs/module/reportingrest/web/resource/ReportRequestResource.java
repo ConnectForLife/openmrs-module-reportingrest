@@ -44,9 +44,10 @@ import org.openmrs.module.webservices.rest.web.resource.impl.BaseDelegatingResou
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingCrudResource;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
 import org.openmrs.module.webservices.rest.web.resource.impl.NeedsPaging;
-import org.openmrs.module.webservices.rest.web.response.ResponseException;
 import org.openmrs.module.webservices.rest.web.response.ConversionException;
+import org.openmrs.module.webservices.rest.web.response.ResponseException;
 import org.openmrs.util.OpenmrsUtil;
+
 
 /**
  * {@link Resource} for {@link ReportRequest}s, supporting standard CRUD operations
@@ -85,14 +86,34 @@ public class ReportRequestResource extends DelegatingCrudResource<ReportRequest>
 						ReportRequest.Status.PROCESSING);
 			} else if (StringUtils.equalsIgnoreCase(statusesGroup, "processing")) {
 				Collections.addAll(statuses, ReportRequest.Status.REQUESTED, ReportRequest.Status.PROCESSING);
+			} else if (StringUtils.equalsIgnoreCase(statusesGroup, "scheduled")) {
+				Collections.addAll(
+						statuses,
+						ReportRequest.Status.SCHEDULED,
+						ReportRequest.Status.SCHEDULE_COMPLETED);
 			}
 
 			ReportService reportService = getService();
 			List<ReportRequest> reportRequests =
 					reportService.getReportRequests(
 							null, null, null, statuses.toArray(new ReportRequest.Status[0]));
-			Collections.sort(reportRequests, new ReportRequest.PriorityComparator());
-			Collections.reverse(reportRequests);
+
+			String sortByParameter = context.getParameter("sortBy");
+			if(StringUtils.isBlank(sortByParameter) || "priority".equals(sortByParameter)) {
+				Collections.sort(reportRequests, new ReportRequest.PriorityComparator());
+				Collections.reverse(reportRequests);
+			} else if("name".equals(sortByParameter)) {
+				Collections.sort(reportRequests, new Comparator<ReportRequest>() {
+					@Override
+					public int compare(ReportRequest left, ReportRequest right) {
+						return left
+								.getReportDefinition()
+								.getParameterizable()
+								.getName()
+								.compareTo(right.getReportDefinition().getParameterizable().getName());
+					}
+				});
+			}
 
 			for (ReportRequest reportRequest : reportRequests) {
 				for (RenderingMode mode :
@@ -118,7 +139,7 @@ public class ReportRequestResource extends DelegatingCrudResource<ReportRequest>
 		List<ReportRequest> reportRequests = getService().getReportRequests(reportDefinition, null, null);
 		return new NeedsPaging<ReportRequest>(reportRequests, context);
 	}
-	
+
 	/**
 	 * @see org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceHandler#save(java.lang.Object)
 	 */
