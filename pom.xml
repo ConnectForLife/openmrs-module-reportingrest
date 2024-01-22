@@ -4,7 +4,7 @@
 
 	<groupId>org.openmrs.module</groupId>
 	<artifactId>reportingrest</artifactId>
-	<version>1.14.0-cfl.1</version>
+	<version>1.14.0-cfl.2</version>
 	<packaging>pom</packaging>
 	<name>Reporting REST</name>
 	<description>Parent project for reportingrest</description>
@@ -26,7 +26,7 @@
     <properties>
         <openMRSVersion>1.9.9</openMRSVersion>
         <webservicesRestVersion>2.21.0</webservicesRestVersion>
-        <reportingVersion>1.21.0-SNAPSHOT</reportingVersion>
+        <reportingVersion>1.25.0-cfl.2</reportingVersion>
         <htmlwidgetsVersion>1.6.4</htmlwidgetsVersion>
         <serializationxstreamVersion>0.2.7</serializationxstreamVersion>
         <calculationVersion>1.0</calculationVersion>
